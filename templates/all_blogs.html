@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <div class="row">
+       
+        {% for BlogData in blog_data %}
+        <div class="col-12 mb-5">
+            <div class="card">
+                <div class="card-body">
+                 <a href="/blogdetail/{{BlogData.id}}" class='text-decoration-none'> <p class="h5 text-dark">{{BlogData.title}}</p></a>
+                 <div class='d-flex'>
+                     <p class='text-muted'>{{BlogData.post_date | date:"M d, Y"}}</p>
+                     <p class='text-muted px-3'>{{BlogData.post_date | time:"h:i A"}}</p>
+                 </div> 
+                </div>
+            </div>  
+        </div>
+        {% endfor %}
+
+        <nav aria-label="...">
+            <ul class="pagination">
+              {% if blog_data.has_previous %}
+              <li class="page-item">
+                  <a class="page-link" href="/blog/all?page={{blog_data.previous_page_number}}">Previous</a>
+              </li>
+              {% endif %}
+              {% for n in total_page %}
+              <li class="page-item"><a class="page-link {% if blog_data.number == n %} active {% endif %}" href="/blog/all?page={{n}}">{{n}}</a></li>
+              {% endfor %}
+              {% if blog_data.has_next %}
+              <li class="page-item">
+                  <a class="page-link" href="/blog/all?page={{blog_data.next_page_number}}">Next</a>
+              </li>
+              {% endif %}
+            </ul>
+        </nav>
+
+
+    </div>
+</div>
+
+
+{% endblock  %}
