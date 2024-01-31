@@ -1,51 +1,76 @@
 from django.shortcuts import render,redirect
 from django.http import HttpResponse
-from blog_app.models import BlogPost,Blogger
+from blog_app.models import Blog_posts,Bloggers,Blog_comments
 from django.core.paginator import Paginator
 from django.contrib.auth.models import User,Group
 from django.contrib.auth import authenticate,login,logout
 from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 from django.contrib import messages
+from django.views import View
 
 
 
-@login_required(login_url="/blog-app/login")
-def IndexPage(request):
-    data = {
-        'title':'django-blog-app-home'
-    }
-    return render(request,'index.html',data)
 
 
-@login_required(login_url="/blog-app/login")
-def All_blogs_page(request):
-    blog_data = BlogPost.objects.all().order_by('-post_date')
-    paginator = Paginator(blog_data,5)
-    page_number = request.GET.get('page')
-    FinalData = paginator.get_page(page_number)
-    total_page = FinalData.paginator.num_pages
-    
-    data = {
-        'title':'django-blog-app-all_blogs',
-        'blog_data':FinalData,
-        'total_page':[n+1 for n in range(total_page)]
-    }
-    return render(request,'all_blogs.html',data)
+@method_decorator(login_required(login_url='/blog-app/login'),name='dispatch')
+class IndexPage(View):
+    def get(self,request):
+        data = {
+            'title':'django-blog-app-home'
+        }
+        return render(request,'index.html',data)
+            
+
+@method_decorator(login_required(login_url='/blog-app/login'),name='dispatch')
+class All_blog_page(View):
+    def get(self,request):
+        blog_data = Blog_posts.objects.all().order_by('-post_date')
+        paginator = Paginator(blog_data,5)
+        page_number = request.GET.get('page')
+        FinalData = paginator.get_page(page_number)
+        total_page = FinalData.paginator.num_pages
+        
+        data = {
+            'title':'django-blog-app-all_blogs',
+            'blog_data':FinalData,
+            'total_page':[n+1 for n in range(total_page)]
+        }
+        return render(request,'all_blogs.html',data)
+        
 
 
 @login_required(login_url="/blog-app/login")
 def blog_detail_page(request,blogId):
-    print('----------------------------------',request)
-    blog_data = BlogPost.objects.get(id = blogId)
+    blog_data = Blog_posts.objects.get(id = blogId)
+    print('----------------blog_data------------------',blog_data)
+    
+    if request.method == 'POST':
+        comment_text = request.POST.get('user_comment')
+        blogger_instance = Bloggers.objects.get(user=request.user)
+        if comment_text:
+            comment = Blog_comments.objects.create(
+                description = comment_text,
+                blog_post = blog_data,
+                user = blogger_instance,
+            )
+            return redirect(f'/blogdetail/{blogId}')
+            
+    
+        
+    comments = Blog_comments.objects.filter(blog_post=blog_data).order_by('-comment_post_date')
+    
+    print('----------------comments------------------',comments)    
     data={
-        'blog_data':blog_data
+        'blog_data':blog_data,
+        'comments':comments
     }
     return render(request,'blog_detail.html',data)
 
 
 @login_required(login_url="/blog-app/login")
 def All_bloggers_page(request):
-    blogger_data = Blogger.objects.all()
+    blogger_data = Bloggers.objects.all()
     
     
     data = {
@@ -57,8 +82,8 @@ def All_bloggers_page(request):
 
 @login_required(login_url="/blog-app/login")
 def blogger_detail_page(request,bloggerId):
-    blogger_data = Blogger.objects.get(id = bloggerId)
-    blog_data = BlogPost.objects.filter(author = bloggerId).order_by('-post_date')
+    blogger_data = Bloggers.objects.get(id = bloggerId)
+    blog_data = Blog_posts.objects.filter(author = bloggerId).order_by('-post_date')
     print("-------------------------blog-data-----------------------",blog_data[2].title)
     data = {
         'blogger_data':blogger_data,
@@ -93,7 +118,7 @@ def Login_page(request):
 
 
 def Register_page(request):
-    
+    print("----request.method----", request.method)
     if request.method == 'POST':
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
@@ -128,7 +153,7 @@ def Register_page(request):
         user.save()
         
         
-        Blogger.objects.create(user=user,bio=user_bio)
+        Bloggers.objects.create(user=user,bio=user_bio)
         
         messages.success(request, "Account Created Successfully",extra_tags='success')
         return redirect('/blog-app/register')
