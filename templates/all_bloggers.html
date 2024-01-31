@@ -2,5 +2,17 @@
 
 {% block content %}
 
-    <h1>This Is A Bloggers Page</h1>
+   <div class='container mt-5'>
+      <div class='row'>
+       {% for BloggerData in blogger_data %}
+         <div class='col-12'>
+             <div class="card mt-3">
+                 <div class="card-body">
+                  <a href="/bloggerdetail/{{BloggerData.id}}" class='text-decoration-none'> <p class="h5 text-dark">{{BloggerData.user}}</p></a>
+                 </div>
+             </div> 
+         </div>
+       {% endfor %} 
+      </div>
+   </div>
 {% endblock  %} 

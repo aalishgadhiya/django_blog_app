@@ -4,7 +4,6 @@
 
 <div class="container mt-5">
     <div class="row">
-       
         {% for BlogData in blog_data %}
         <div class="col-12 mb-5">
             <div class="card">
@@ -13,6 +12,7 @@
                  <div class='d-flex'>
                      <p class='text-muted'>{{BlogData.post_date | date:"M d, Y"}}</p>
                      <p class='text-muted px-3'>{{BlogData.post_date | time:"h:i A"}}</p>
+                     <p class='text-muted px-3'>- {{BlogData.author | title}}</p>
                  </div> 
                 </div>
             </div>  
