@@ -12,7 +12,7 @@
                  <div class='d-flex'>
                      <p class='text-muted'>{{BlogData.post_date | date:"M d, Y"}}</p>
                      <p class='text-muted px-3'>{{BlogData.post_date | time:"h:i A"}}</p>
-                     <p class='text-muted px-3'>- {{BlogData.author | title}}</p>
+                     <a href="/bloggerdetail/{{BlogData.author.id}}" class='text-decoration-none'> <p class='text-muted px-3'>- {{BlogData.author | title}}</p> </a>
                  </div> 
                 </div>
             </div>  

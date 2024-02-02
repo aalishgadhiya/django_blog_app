@@ -21,8 +21,6 @@ class Blog_posts(models.Model):
     def __str__(self) -> str:
         return self.title
 
-
-
     
 class Blog_comments(models.Model):
     description = models.TextField()

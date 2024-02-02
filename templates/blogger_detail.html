@@ -12,14 +12,18 @@
                 <div class='mt-5'>
                     <h6 class='display-5'>Blogs List</h6>
                 </div>
-                {% for BlogData in blog_data %}
-                 <div class="card mx-5 mt-3 mb-5">
-                     <div class="card-body mb-0 pb-0">
-                       <a href="/blogdetail/{{BlogData.id}}" class='text-decoration-none'> <p class="h5 text-dark">{{BlogData.title}}</p></a>
-                       <p class='text-muted'>{{BlogData.post_date | date:"M d, Y"}}</p>
-                     </div>
-                 </div>
-                {% endfor %}
+                {% if blog_data %}
+                  {% for BlogData in blog_data %}
+                   <div class="card mx-5 mt-3 mb-5">
+                       <div class="card-body mb-0 pb-0">
+                         <a href="/blogdetail/{{BlogData.id}}" class='text-decoration-none'> <p class="h5 text-dark">{{BlogData.title}}</p></a>
+                         <p class='text-muted'>{{BlogData.post_date | date:"M d, Y"}}</p>
+                       </div>
+                   </div>
+                  {% endfor %}
+                {% else %}
+                    <p>no blog available.</p>
+                {% endif %}
             </div>
         </div>
    </div>
