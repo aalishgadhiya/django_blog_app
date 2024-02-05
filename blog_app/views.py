@@ -8,6 +8,8 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.contrib import messages
 from django.views import View
+from django.utils import timezone
+# import pytz
 
 
 @method_decorator(login_required(login_url='/blog-app/login'),name='dispatch')
@@ -34,7 +36,32 @@ class All_blog_page(View):
             'total_page':[n+1 for n in range(total_page)]
         }
         return render(request,'all_blogs.html',data)
+    
+    
+    def post(self,request):
+        blog_title = request.POST.get('blog_title')
+        blog_description = request.POST.get('blog_description')
+        blogger_instance = Bloggers.objects.get(user=request.user)
+        blog_post = Blog_posts.objects.create(
+            title = blog_title,
+            content = blog_description,
+            author = blogger_instance
+        )
         
+        india_timezone = timezone.get_default_timezone() 
+        blog_post_date = blog_post.post_date.astimezone(india_timezone).strftime("%b %d, %Y")
+        blog_post_time = blog_post.post_date.astimezone(india_timezone).strftime("%I:%M %p")
+        
+        return JsonResponse({
+            'success':True,
+            'blog_title':blog_title,
+            'blog_description':blog_description,
+            'user_name':blogger_instance.user.username.title(),
+            'post_date':blog_post_date,
+            'post_time':blog_post_time,
+            'blog_id':blog_post.id,
+            'author_id':blogger_instance.id,
+        })
 
 
 @method_decorator(login_required(login_url='/blog-app/login'),name='dispatch')

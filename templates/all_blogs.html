@@ -1,24 +1,65 @@
 {% extends "base.html" %}
 
 {% block content %}
-
-<div class="container mt-5">
-    <div class="row">
-        {% for BlogData in blog_data %}
-        <div class="col-12 mb-5">
-            <div class="card">
-                <div class="card-body">
-                 <a href="/blogdetail/{{BlogData.id}}" class='text-decoration-none'> <p class="h5 text-dark">{{BlogData.title}}</p></a>
-                 <div class='d-flex'>
-                     <p class='text-muted'>{{BlogData.post_date | date:"M d, Y"}}</p>
-                     <p class='text-muted px-3'>{{BlogData.post_date | time:"h:i A"}}</p>
-                     <a href="/bloggerdetail/{{BlogData.author.id}}" class='text-decoration-none'> <p class='text-muted px-3'>- {{BlogData.author | title}}</p> </a>
-                 </div> 
+<!-- modal  -->
+<div class="modal fade bd-example-modal-lg" id="addBlogModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+     <div class="modal-content">
+         <div class="modal-header">
+             <h5 class="modal-title" id="exampleModalLabel">Blog Post</h5>
+             <button type="button" class="btn-close" data-bs-dismiss="modal"
+                 aria-label="Close"></button>
+         </div>
+         <div class="modal-body">
+            <p class='text-muted'>Create Your Blog...</p>
+             <form id="addBlogForm" method='post'>
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="blogTitle">Title:</label>
+                    <input type="text" class="form-control" name='blog_title' id="blogTitle" pattern=".*\S+.*" title='please Enter Title'>
+                    <div class='errorBox' id='title_error'></div>
                 </div>
-            </div>  
-        </div>
-        {% endfor %}
+                <div class="form-group mt-3">
+                    <label for="blogDescription">Description:</label>
+                    <textarea class="form-control" id="blogDescription" name='blog_description'  rows="4"></textarea>
+                    <div class='errorBox' id='desc_error'></div>
+                </div>
+                <button type="submit" class="btn btn-primary mt-3">Create Blog</button>
+            </form>
+         </div>
+         <div class="modal-footer">
+             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+         </div>
+     </div>
+  </div>
+</div>
+<!--  end -  modal  -->
 
+
+<div class="container mt-5">        
+    <div class='row'>
+        <div class='col-12 d-flex justify-content-end mb-2'>
+            <button class='btn btn-primary'  data-bs-toggle='modal' data-bs-target='#addBlogModal'>Add Blog</button>
+        </div>
+    </div>
+    <div class="row">
+        <div id="blogPostContainer">
+            {% for BlogData in blog_data %}
+            <div class="col-12 mb-5">
+                <div class="card">
+                    <div class="card-body">
+                     <a href="/blogdetail/{{BlogData.id}}" class='text-decoration-none'> <p class="h5 text-dark">{{BlogData.title}}</p></a>
+                     <div class='d-flex'>
+                         <p class='text-muted'>{{BlogData.post_date | date:"M d, Y"}}</p>
+                         <p class='text-muted px-3'>{{BlogData.post_date | time:"h:i A"}}</p>
+                         <a href="/bloggerdetail/{{BlogData.author.id}}" class='text-decoration-none'> <p class='text-muted px-3'>- {{BlogData.author | title}}</p> </a>
+                     </div> 
+                    </div>
+                </div>  
+            </div>
+            {% endfor %}
+        </div>
         <nav aria-label="...">
             <ul class="pagination">
               {% if blog_data.has_previous %}
@@ -40,6 +81,4 @@
 
     </div>
 </div>
-
-
 {% endblock  %}

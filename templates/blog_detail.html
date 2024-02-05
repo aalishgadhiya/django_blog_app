@@ -56,32 +56,5 @@
             </div>
         </div>
      </div>
-</div>
- {% comment %} <script>
-   let blog_id = $('#blogDetailContainer').data('blog-id')
-   console.log(blog_id);
-   
-   $(document).ready(function () { 
-    $('#comment_form').submit(function(e){
-       e.preventDefault();
-       $.ajex({
-           type: 'POST',
-           url: `/bloggerdetail/${blog_id}`,
-           data:$('#comment_form').serialize(),
-           success:function(response){
-            
-              if(response.success){
-                var newComment = '<div class="comment"><p><strong>' + response.user_name + '</strong> (' + response.comment_date + '): ' + response.comment_text + '</p></div>';
-                $('#commentsContainer').prepend(newComment);
-
-                $('#user_comment').val('');
-              }
-           },
-           error: function(error){
-            console.log(error);
-           }
-        });
-    });
-}); 
-</script>  {% endcomment %}
+</div> 
 {% endblock  %}
