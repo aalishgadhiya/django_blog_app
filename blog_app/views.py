@@ -9,6 +9,7 @@ from django.utils.decorators import method_decorator
 from django.contrib import messages
 from django.views import View
 from django.utils import timezone
+from utils import SendResponse,getCustomtimesince,convert_utc_to_ist,date_time_format
 # import pytz
 
 
@@ -37,32 +38,6 @@ class All_blog_page(View):
         }
         return render(request,'all_blogs.html',data)
     
-    
-    def post(self,request):
-        blog_title = request.POST.get('blog_title')
-        blog_description = request.POST.get('blog_description')
-        blogger_instance = Bloggers.objects.get(user=request.user)
-        blog_post = Blog_posts.objects.create(
-            title = blog_title,
-            content = blog_description,
-            author = blogger_instance
-        )
-        
-        india_timezone = timezone.get_default_timezone() 
-        blog_post_date = blog_post.post_date.astimezone(india_timezone).strftime("%b %d, %Y")
-        blog_post_time = blog_post.post_date.astimezone(india_timezone).strftime("%I:%M %p")
-        
-        return JsonResponse({
-            'success':True,
-            'blog_title':blog_title,
-            'blog_description':blog_description,
-            'user_name':blogger_instance.user.username.title(),
-            'post_date':blog_post_date,
-            'post_time':blog_post_time,
-            'blog_id':blog_post.id,
-            'author_id':blogger_instance.id,
-        })
-
 
 @method_decorator(login_required(login_url='/blog-app/login'),name='dispatch')
 class blog_detail_page(View):
@@ -75,29 +50,6 @@ class blog_detail_page(View):
         }
         return render(request,'blog_detail.html',data)
     
-    
-    def post(self,request,blogId):
-        print('12345-----------------',blogId)
-        blog_data = Blog_posts.objects.get(id = blogId)
-        comment_text = request.POST.get('user_comment')
-        blogger_instance = Bloggers.objects.get(user=request.user)
-        
-        if comment_text:
-            comment = Blog_comments.objects.create(
-                description = comment_text,
-                blog_post = blog_data,
-                user = blogger_instance,
-            )
-            print(comment_text)
-            # return redirect(f'/blogdetail/{blogId}')
-            comment_date = comment.comment_post_date.strftime("%b,%d %Y")
-            return JsonResponse({
-                'success':True,
-                'comment_text':comment_text,
-                'user_name':blogger_instance.user.username,
-                'comment_date':comment_date
-                })
-        
     
 @method_decorator(login_required(login_url='/blog-app/login'),name='dispatch')
 class All_bloggers_page(View):
@@ -204,3 +156,64 @@ class Logout_page(View):
         logout(request)
         return redirect('/blog-app/login')
         
+
+
+
+class CreateBlogView(View):
+    def post(self,request):
+       blog_title = request.POST.get('blog_title')
+       blog_description = request.POST.get('blog_description')
+       blogger_instance = Bloggers.objects.get(user=request.user)
+       blog_post = Blog_posts.objects.create(
+           title = blog_title,
+           content = blog_description,
+           author = blogger_instance
+       )
+       
+    
+       
+       combined_string = date_time_format(blog_post.post_date)
+       ist_date, ist_time=  convert_utc_to_ist(combined_string)               
+       customtimesince = getCustomtimesince(blog_post.post_date)
+       
+       return SendResponse(200,{
+           'success':True,
+           'blog_title':blog_title,
+           'blog_description':blog_description,
+           'user_name':blogger_instance.user.username.title(),
+           'post_date':ist_date,
+           'post_time':ist_time,
+           'customtimesince':customtimesince,
+           'blog_id':blog_post.id,
+           'author_id':blogger_instance.id,
+       })
+       
+       
+       
+       
+class AddCommentView(View):
+    def post(self,request,blogId):
+        print('blogId-blogId-blogId=-----------------',blogId)
+        blog_data = Blog_posts.objects.get(id = blogId)
+        comment_text = request.POST.get('user_comment')
+        blogger_instance = Bloggers.objects.get(user=request.user)
+        
+        if comment_text:
+            comment = Blog_comments.objects.create(
+                description = comment_text,
+                blog_post = blog_data,
+                user = blogger_instance,
+            )
+            print(comment_text)
+            # return redirect(f'/blogdetail/{blogId}')
+            comment_date = comment.comment_post_date.strftime("%b,%d %Y")
+            customtimesince = getCustomtimesince(comment.comment_post_date)
+            
+            return SendResponse(200,{
+                'success':True,
+                'comment_text':comment_text,
+                'user_name':blogger_instance.user.username,
+                'comment_date':comment_date,
+                'customtimesince':customtimesince
+                })
+                
