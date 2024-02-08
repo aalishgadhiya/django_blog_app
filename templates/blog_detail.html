@@ -13,7 +13,7 @@
                 <hr>
                 <div class='d-flex justify-content-center'>
                     <h6 class='m-2'>{{blog_data.post_date | date:'M,d Y'}}</h6>
-                    <h6 class='m-2'> - {{blog_data.author | title}}</h6>
+                    <h6 class='m-2'><a href="/bloggerdetail/{{blog_data.author.id}}" class='text-decoration-none text-black'>- {{blog_data.author | title}}</a></h6>
                 </div>
              </div>
        </div>
@@ -36,27 +36,36 @@
                  {% if comments %}               
                     <div id='commentsContainer'>
                         {% for comment in comments %}
-                        <div class='d-flex'>
+                        <div class='d-flex main_comment_div' data-comment-Id='{{comment.id}}'>
                           <div class='rounded-circle  d-flex justify-content-center align-items-center mt-2 mx-2' style='height: 50px; width: 50px; background-color:#D3D3D3'><h4 class='pt-2'>{{ comment.user| striptags |first_char | capfirst }}</h4></div>
                           <div class="media mb-4 card shadow-sm p-3 col-10">
                             <div class="media-body">
                             <div class='d-flex'>
-                                <h5 class="mt-0">{{comment.user}}</h5>
+                                <h5 class="mt-0"><a href="/bloggerdetail/{{comment.user.id}}" class='text-decoration-none text-black'>{{comment.user}}</a></h5>
                                 <p class='text-muted px-1'>&#183;</p>
                                 <p class='text-muted'>{{comment.comment_post_date | custom_timesince}}</p>
                             </div>
-                            <div class='d-flex'>
+                            <div class='d-flex comment_box'>
                                 <p class='comment-content'>{{comment.description | truncatechars:100}}</p>
                                 <p class="comment-full" style="display: none;">{{comment.description}}</p>
                             </div>  
+                            <div class='d-none edit_comment_container'>
+                                <div class="mb-3 col-6">
+                                  <textarea type="text" class="form-control edit_comment_form" id="update_comment_input" rows=4 required></textarea>
+                                </div>
+                            </div>
                             {% if comment.description|length > 100 %}
                               <h5 class='show-more-btn text-black btn btn-link mt-0 pt-0 text-decoration-none' style='font-weight: bold;'>...Show more</h5>
                             {% endif %}
                               <div class="d-flex justify-content-between align-items-center">
                                 <small class="text-muted">Commented on {{comment.comment_post_date | date:'M,d Y'}}</small>
                                 {% if user.is_authenticated and user.bloggers == comment.user %}
-                                  <button type="button" class="btn btn-sm btn-outline-primary">Edit</button>
-                                {% endif %}
+                                <button class="btn btn-sm btn-outline-primary btn_comment_edit" data-comment-id='{{comment.id}}'><i class="bi bi-pen"></i></button>
+                               <div class='d-none edit_comment_container d-flex'>
+                                  <button class="btn btn-sm btn-secondary mx-2 btn_cancel">Cancel</button>
+                                     <button type='button' class="btn btn-sm btn-primary disabled btn_save btn_comment_submit">Save</button>
+                                   </div> 
+                                 {% endif %}
                               </div>
                             </div>
                           </div>
@@ -68,17 +77,14 @@
                    <p id='no_comments'>No comments available.</p>
                  {% endif %}
                  <h5 class='text-muted'>Post Your Comment Here: </h5>
-                 <form class="col-6" id='comment_form' method="post">
-                    {% csrf_token %}
-                     <div class="form-floating mb-3">
+                     <div class="form-floating mb-3 col-6">
                        <textarea class="form-control" placeholder="Please Enter A Comment" id="user_comment" style="height: 100px" name='user_comment' required></textarea>
                        <label for="user_comment">Comment</label>
                      </div>
                      <p>Enter Comment about Blog Here...</p>
-                     <button type="submit" class="btn btn-primary mt-4">Submit</button>
-                 </form> 
+                     <button type="button" class="btn btn-primary mt-4 btn_comment_submit" id='btn_submit_comment'>Submit</button>
             </div>
         </div>
      </div>
 </div> 
-{% endblock  %}
+{% endblock %}

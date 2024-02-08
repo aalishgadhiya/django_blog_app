@@ -194,9 +194,9 @@ class CreateBlogView(View):
 class AddCommentView(View):
     def post(self,request,blogId):
         print('blogId-blogId-blogId=-----------------',blogId)
-        blog_data = Blog_posts.objects.get(id = blogId)
-        comment_text = request.POST.get('user_comment')
         blogger_instance = Bloggers.objects.get(user=request.user)
+        blog_data = Blog_posts.objects.get(id = blogId)
+        comment_text = request.POST.get('comment_text')
         
         if comment_text:
             comment = Blog_comments.objects.create(
@@ -209,11 +209,37 @@ class AddCommentView(View):
             comment_date = comment.comment_post_date.strftime("%b,%d %Y")
             customtimesince = getCustomtimesince(comment.comment_post_date)
             
+            
+            print('-----------comment-id---------',comment.id)
+            
             return SendResponse(200,{
                 'success':True,
                 'comment_text':comment_text,
                 'user_name':blogger_instance.user.username,
                 'comment_date':comment_date,
-                'customtimesince':customtimesince
+                'customtimesince':customtimesince,
+                'cId':comment.id,
+                'author_id':blogger_instance.id,
                 })
                 
+                
+                
+class EditComment(View):
+    def post(self,request,comment_id):
+        updated_comment = request.POST.get('updated_comment')
+        comment = Blog_comments.objects.get(id=comment_id)
+        comment.description = updated_comment
+        comment.save()
+        blogger_instance = Bloggers.objects.get(user=request.user)
+        comment_date = comment.comment_post_date.strftime("%b,%d %Y")
+        customtimesince = getCustomtimesince(comment.comment_post_date)
+        return SendResponse(200,{
+            'success': True,
+            'comment_text':updated_comment,
+            'user_name':blogger_instance.user.username,
+            'comment_date':comment_date,
+            'customtimesince':customtimesince,
+            'cId':comment_id,
+            'author_id':blogger_instance.id,
+        })
+                        
