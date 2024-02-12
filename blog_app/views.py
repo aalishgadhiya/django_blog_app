@@ -189,6 +189,47 @@ class CreateBlogView(View):
        })
        
        
+class UpdateBlog(View):
+    def post(self,request,blog_id):
+        blog_title = request.POST.get('blog_title')
+        blog_description = request.POST.get('blog_description')
+        blog_post = Blog_posts.objects.get(id=blog_id)
+        
+        blog_post.title = blog_title
+        blog_post.content = blog_description
+        
+        blog_post.save()
+        
+        blogger_instance = Bloggers.objects.get(user=request.user)
+        combined_string = date_time_format(blog_post.post_date)
+        ist_date, ist_time=  convert_utc_to_ist(combined_string)               
+        customtimesince = getCustomtimesince(blog_post.post_date)
+    
+        return SendResponse(200,{
+           'success':True,
+           'blog_title':blog_title,
+           'blog_description':blog_description,
+           'user_name':blogger_instance.user.username.title(),
+           'post_date':ist_date,
+           'post_time':ist_time,
+           'customtimesince':customtimesince,
+           'blog_id':blog_post.id,
+           'author_id':blogger_instance.id,
+       })
+        
+class DeleteBlog(View):
+    def delete(self,request,blog_id):
+        blog = Blog_posts.objects.get(id=blog_id)
+        blog.delete()        
+        
+        return SendResponse(200,{
+            'success': True,
+            'message': 'Blog deleted successfully'
+        })
+
+        
+       
+       
        
        
 class AddCommentView(View):
@@ -206,7 +247,10 @@ class AddCommentView(View):
             )
             print(comment_text)
             # return redirect(f'/blogdetail/{blogId}')
-            comment_date = comment.comment_post_date.strftime("%b,%d %Y")
+            # comment_date = comment.comment_post_date.strftime("%b,%d %Y")
+            
+            combined_string = date_time_format(comment.comment_post_date)
+            ist_date, ist_time=  convert_utc_to_ist(combined_string)  
             customtimesince = getCustomtimesince(comment.comment_post_date)
             
             
@@ -216,7 +260,8 @@ class AddCommentView(View):
                 'success':True,
                 'comment_text':comment_text,
                 'user_name':blogger_instance.user.username,
-                'comment_date':comment_date,
+                'post_date':ist_date,
+                'post_time':ist_time,
                 'customtimesince':customtimesince,
                 'cId':comment.id,
                 'author_id':blogger_instance.id,
@@ -231,15 +276,40 @@ class EditComment(View):
         comment.description = updated_comment
         comment.save()
         blogger_instance = Bloggers.objects.get(user=request.user)
-        comment_date = comment.comment_post_date.strftime("%b,%d %Y")
+        
+        # comment_date = comment.comment_post_date.strftime("%b,%d %Y")
+        
+        combined_string = date_time_format(comment.comment_post_date)
+        ist_date, ist_time=  convert_utc_to_ist(combined_string) 
         customtimesince = getCustomtimesince(comment.comment_post_date)
         return SendResponse(200,{
             'success': True,
-            'comment_text':updated_comment,
-            'user_name':blogger_instance.user.username,
-            'comment_date':comment_date,
-            'customtimesince':customtimesince,
-            'cId':comment_id,
-            'author_id':blogger_instance.id,
+            'comment_text': updated_comment,
+            'user_name': blogger_instance.user.username,
+            'post_date': ist_date,
+            'post_time': ist_time,
+            'customtimesince': customtimesince,
+            'cId': comment_id,
+            'author_id': blogger_instance.id,
         })
+            
+class DeleteComment(View):
+    def delete(self,request,comment_id):
+        comment = Blog_comments.objects.get(id=comment_id)
+        comment.delete()
+        return SendResponse(200,{
+            'success': True,
+            'message': 'Comment deleted successfully'
+        })
+                        
+                        
+class GetBlogData(View):
+    def get(self,request,blogId):
+        blog_data = Blog_posts.objects.get(id = blogId)
+        return SendResponse(200,{
+            'success': True,
+            'blog_id': blog_data.id,
+            'blog_title': blog_data.title,
+            'blog_content': blog_data.content
+        })                          
                         
